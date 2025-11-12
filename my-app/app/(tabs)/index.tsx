@@ -76,9 +76,39 @@ export default function HomeScreen() {
       {photoUri ? (
         <View style={styles.previewContainer}>
           <Image source={{ uri: photoUri }} style={styles.preview} />
-          <TouchableOpacity style={[styles.button, { marginTop: 16 }]} onPress={handleRetake}>
-            <ThemedText style={styles.buttonText}>Retake</ThemedText>
-          </TouchableOpacity>
+          <View style={styles.buttonRow}>
+            <TouchableOpacity style={[styles.modernButton, styles.retakeButton]} onPress={handleRetake} activeOpacity={0.85}>
+              <ThemedText style={styles.retakeButtonText}>Retake</ThemedText>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modernButton, styles.analyzeButton]}
+              onPress={async () => {
+                if (!photoUri) return;
+                try {
+                  const response = await fetch(photoUri);
+                  const blob = await response.blob();
+                  // Replace the URL below with your backend endpoint
+                  const uploadResponse = await fetch('https://your-backend.com/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/octet-stream',
+                    },
+                    body: blob,
+                  });
+                  if (uploadResponse.ok) {
+                    alert('Image sent for analysis!');
+                  } else {
+                    alert('Failed to send image.');
+                  }
+                } catch (e) {
+                  alert('Error sending image: ' + e);
+                }
+              }}
+              activeOpacity={0.85}
+            >
+              <ThemedText style={styles.analyzeButtonText}>Analyze</ThemedText>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <View style={styles.content}>
@@ -143,4 +173,47 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
   },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 20,
+    gap: 16,
+  },
+  modernButton: {
+    flex: 1,
+    minWidth: 120,
+    marginHorizontal: 4,
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  retakeButton: {
+    backgroundColor: '#fff',
+    borderWidth: 2,
+    borderColor: '#2563eb',
+  },
+  analyzeButton: {
+    backgroundColor: '#2563eb',
+    borderWidth: 0,
+  },
+  retakeButtonText: {
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#2563eb',
+  },
+  analyzeButtonText: {
+    fontSize: 17,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: '#fff',
+  },
+  // ...existing code...
 });
